@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Road to 5K</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --surface2: #1e1e1e;
+    --accent: #e8ff47;
+    --accent2: #ff6b35;
+    --text: #f0f0f0;
+    --muted: #666;
+    --border: #2a2a2a;
+    --run: #e8ff47;
+    --walk: #4a9eff;
+    --complete: #47ffb2;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    max-width: 430px;
+    margin: 0 auto;
+    padding-bottom: 80px;
+  }
+
+  /* Header */
+  .header {
+    padding: 24px 20px 16px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 100;
+  }
+
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 2px;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .logo span { color: var(--text); }
+
+  .streak-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .streak-fire { font-size: 16px; }
+
+  /* Overall progress bar */
+  .overall-progress {
+    padding: 16px 20px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .progress-label strong { color: var(--accent); font-size: 14px; }
+
+  .progress-track {
+    height: 6px;
+    background: var(--surface2);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 3px;
+    transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* Week pills nav */
+  .week-nav {
+    display: flex;
+    gap: 8px;
+    padding: 16px 20px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .week-nav::-webkit-scrollbar { display: none; }
+
+  .week-pill {
+    flex-shrink: 0;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .week-pill.active {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+    font-weight: 600;
+  }
+
+  .week-pill.completed {
+    border-color: var(--complete);
+    color: var(--complete);
+  }
+
+  .week-pill.locked {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  /* Week detail */
+  .week-detail {
+    padding: 20px;
+  }
+
+  .week-header {
+    margin-bottom: 20px;
+  }
+
+  .week-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 42px;
+    letter-spacing: 2px;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .week-subtitle {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .week-intervals {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin: 12px 0;
+  }
+
+  .interval-chip {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  .interval-chip.run {
+    background: rgba(232, 255, 71, 0.12);
+    color: var(--run);
+    border: 1px solid rgba(232, 255, 71, 0.3);
+  }
+
+  .interval-chip.walk {
+    background: rgba(74, 158, 255, 0.12);
+    color: var(--walk);
+    border: 1px solid rgba(74, 158, 255, 0.3);
+  }
+
+  /* Workout cards */
+  .workouts-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .workout-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .workout-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--border);
+    transition: background 0.2s;
+  }
+
+  .workout-card.completed::before { background: var(--complete); }
+  .workout-card.active-today::before { background: var(--accent); }
+
+  .workout-card:hover:not(.locked-card) {
+    border-color: #3a3a3a;
+    background: var(--surface2);
+    transform: translateY(-1px);
+  }
+
+  .workout-card.locked-card {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .workout-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  .workout-icon.done { background: rgba(71, 255, 178, 0.12); }
+  .workout-icon.today { background: rgba(232, 255, 71, 0.12); }
+  .workout-icon.upcoming { background: var(--surface2); }
+
+  .workout-info { flex: 1; }
+
+  .workout-name {
+    font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 4px;
+  }
+
+  .workout-meta {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .workout-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .workout-meta span + span::before {
+    content: '·';
+    margin: 0 4px;
+  }
+
+  .workout-action {
+    flex-shrink: 0;
+  }
+
+  .btn-complete {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-complete:hover { opacity: 0.85; transform: scale(0.97); }
+
+  .btn-undo {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-undo:hover { color: var(--text); border-color: #444; }
+
+  .checkmark {
+    width: 28px;
+    height: 28px;
+    background: rgba(71, 255, 178, 0.15);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--complete);
+    font-size: 14px;
+  }
+
+  /* Stats bar */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+  }
+
+  .stat-cell {
+    background: var(--surface);
+    padding: 14px 12px;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    letter-spacing: 1px;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 3px;
+  }
+
+  /* Repeat week button */
+  .week-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .btn-secondary {
+    flex: 1;
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 12px;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+
+  .btn-secondary:hover { color: var(--text); border-color: #444; }
+
+  /* Motivational banner */
+  .motivation-banner {
+    margin: 0 20px 20px;
+    background: linear-gradient(135deg, rgba(232,255,71,0.08), rgba(255,107,53,0.08));
+    border: 1px solid rgba(232,255,71,0.2);
+    border-radius: 14px;
+    padding: 16px;
+  }
+
+  .motivation-text {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  .motivation-emoji { font-size: 20px; margin-bottom: 6px; display: block; }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--complete);
+    color: var(--bg);
+    padding: 12px 20px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 14px;
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 999;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Bottom nav */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 430px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    display: flex;
+    padding: 12px 0 20px;
+  }
+
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+
+  .nav-item.active { color: var(--accent); }
+  .nav-icon { font-size: 20px; }
+
+  /* Log view */
+  .log-view { padding: 20px; display: none; }
+  .log-view.active { display: block; }
+  .plan-view { display: block; }
+  .plan-view.hidden { display: none; }
+
+  .log-entry {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .log-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--complete);
+    flex-shrink: 0;
+  }
+
+  .log-info { flex: 1; }
+  .log-title { font-weight: 500; font-size: 15px; }
+  .log-date { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .log-badge {
+    background: rgba(71, 255, 178, 0.1);
+    color: var(--complete);
+    border: 1px solid rgba(71, 255, 178, 0.2);
+    padding: 3px 10px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+    color: var(--muted);
+  }
+
+  .empty-log {
+    text-align: center;
+    padding: 48px 20px;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .empty-log .big { font-size: 40px; display: block; margin-bottom: 12px; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  .pulse { animation: pulse 2s infinite; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-top">
+    <div>
+      <div class="logo">Road to <span>5K</span></div>
+    </div>
+    <div class="streak-badge">
+      <span class="streak-fire">🔥</span>
+      <span id="streakCount">0</span> week streak
+    </div>
+  </div>
+</div>
+
+<!-- Overall Progress -->
+<div class="overall-progress">
+  <div class="progress-label">
+    <span>Overall Progress</span>
+    <strong id="progressPct">0%</strong>
+  </div>
+  <div class="progress-track">
+    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+  </div>
+</div>
+
+<!-- Stats Bar -->
+<div class="stats-bar">
+  <div class="stat-cell">
+    <div class="stat-value" id="statWorkouts">0</div>
+    <div class="stat-label">Workouts</div>
+  </div>
+  <div class="stat-cell">
+    <div class="stat-value" id="statWeeks">0</div>
+    <div class="stat-label">Weeks Done</div>
+  </div>
+  <div class="stat-cell">
+    <div class="stat-value" id="statLeft">27</div>
+    <div class="stat-label">To Go</div>
+  </div>
+</div>
+
+<!-- Plan View -->
+<div class="plan-view" id="planView">
+
+  <!-- Motivation Banner -->
+  <div class="motivation-banner" id="motivationBanner">
+    <span class="motivation-emoji">👟</span>
+    <div class="motivation-text" id="motivationText">Your 5K journey starts here. Complete your first workout to begin building the habit that will carry you across that finish line.</div>
+  </div>
+
+  <!-- Week Nav -->
+  <div class="week-nav" id="weekNav"></div>
+
+  <!-- Week Detail -->
+  <div class="week-detail" id="weekDetail"></div>
+
+</div>
+
+<!-- Log View -->
+<div class="log-view" id="logView">
+  <div class="section-title">Your Run Log</div>
+  <div id="logEntries"></div>
+</div>
+
+<!-- Bottom Nav -->
+<div class="bottom-nav">
+  <div class="nav-item active" id="navPlan" onclick="showView('plan')">
+    <span class="nav-icon">📋</span>
+    Plan
+  </div>
+  <div class="nav-item" id="navLog" onclick="showView('log')">
+    <span class="nav-icon">📈</span>
+    Log
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── PROGRAM DATA ───────────────────────────────────────────────────────────
+const PROGRAM = [
+  {
+    week: 1,
+    title: "First Steps",
+    description: "Alternate 60 sec runs with 90 sec walks. Total ~20 min. Your body is learning something new — trust the process.",
+    intervals: [{type:'run', label:'60s Run'}, {type:'walk', label:'90s Walk'}],
+    repeats: 8,
+    totalMin: 20
+  },
+  {
+    week: 2,
+    title: "Finding Rhythm",
+    description: "90 sec runs, 2 min walks. You're building aerobic base. Focus on breathing, not speed.",
+    intervals: [{type:'run', label:'90s Run'}, {type:'walk', label:'2min Walk'}],
+    repeats: 6,
+    totalMin: 22
+  },
+  {
+    week: 3,
+    title: "Stretching Further",
+    description: "Mix of 90s and 3 min runs. This is where it starts feeling like running.",
+    intervals: [{type:'run', label:'90s Run'}, {type:'walk', label:'90s Walk'}, {type:'run', label:'3min Run'}, {type:'walk', label:'3min Walk'}],
+    repeats: 2,
+    totalMin: 25
+  },
+  {
+    week: 4,
+    title: "Building Endurance",
+    description: "3 min and 5 min run blocks. Your lungs and legs are adapting faster than you think.",
+    intervals: [{type:'run', label:'3min Run'}, {type:'walk', label:'90s Walk'}, {type:'run', label:'5min Run'}, {type:'walk', label:'2.5min Walk'}],
+    repeats: 2,
+    totalMin: 28
+  },
+  {
+    week: 5,
+    title: "The Leap",
+    description: "Runs up to 20 minutes. Day 3 is a milestone: 20 min continuous run. You're ready for it.",
+    intervals: [{type:'run', label:'5min Run'}, {type:'walk', label:'3min Walk'}, {type:'run', label:'8min Run'}],
+    repeats: null,
+    totalMin: 30,
+    special: "Day 3: 20-minute continuous run"
+  },
+  {
+    week: 6,
+    title: "No Looking Back",
+    description: "Alternating workouts — runs are getting longer with shorter recovery. You're becoming a runner.",
+    intervals: [{type:'run', label:'10min Run'}, {type:'walk', label:'3min Walk'}, {type:'run', label:'10min Run'}],
+    repeats: null,
+    totalMin: 30,
+    special: "Day 3: 25-minute continuous run"
+  },
+  {
+    week: 7,
+    title: "Continuous Runner",
+    description: "25-minute runs, all three days. No walking breaks. This is your new baseline.",
+    intervals: [{type:'run', label:'25min Run'}],
+    repeats: 1,
+    totalMin: 25
+  },
+  {
+    week: 8,
+    title: "Almost There",
+    description: "28-minute runs. You can feel the 5K in reach. Keep the pace easy and comfortable.",
+    intervals: [{type:'run', label:'28min Run'}],
+    repeats: 1,
+    totalMin: 28
+  },
+  {
+    week: 9,
+    title: "Race Ready",
+    description: "30-minute runs. After this week, you're ready to race your 5K. Find your event.",
+    intervals: [{type:'run', label:'30min Run'}],
+    repeats: 1,
+    totalMin: 30
+  }
+];
+
+const WORKOUTS_PER_WEEK = 3;
+const TOTAL_WORKOUTS = PROGRAM.length * WORKOUTS_PER_WEEK; // 27
+
+const MOTIVATIONS = [
+  "Every run you complete is proof you're the kind of person who follows through.",
+  "The hardest part is putting on the shoes. You've already done that.",
+  "You're not running from anything — you're running toward something.",
+  "5 weeks in and you're doing things your past self couldn't imagine.",
+  "The 5K finish line is getting closer with every step.",
+  "Consistency beats intensity. Show up, run, repeat.",
+  "You don't have to be fast. You just have to not stop.",
+  "Every runner was once someone who had never run before.",
+];
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let state = {
+  currentWeek: 1,
+  completedWorkouts: [], // [{week, day, date}]
+};
+
+function loadState() {
+  try {
+    const saved = localStorage.getItem('road5k');
+    if (saved) state = JSON.parse(saved);
+  } catch(e) {}
+}
+
+function saveState() {
+  try { localStorage.setItem('road5k', JSON.stringify(state)); } catch(e) {}
+}
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+function isCompleted(week, day) {
+  return state.completedWorkouts.some(w => w.week === week && w.day === day);
+}
+
+function weekCompleted(week) {
+  const done = state.completedWorkouts.filter(w => w.week === week).length;
+  return done >= WORKOUTS_PER_WEEK;
+}
+
+function weeksCompleted() {
+  let count = 0;
+  for (let w = 1; w <= 9; w++) if (weekCompleted(w)) count++;
+  return count;
+}
+
+function totalCompleted() {
+  return state.completedWorkouts.length;
+}
+
+function weekUnlocked(week) {
+  if (week === 1) return true;
+  return weekCompleted(week - 1);
+}
+
+function streak() {
+  let s = 0;
+  for (let w = 1; w <= 9; w++) {
+    if (weekCompleted(w)) s++;
+    else break;
+  }
+  return s;
+}
+
+function getMotivation() {
+  const done = totalCompleted();
+  if (done === 0) return "Your 5K journey starts here. Complete your first workout to begin building the habit that will carry you across that finish line.";
+  if (done >= 24) return "You're in the home stretch. The finish line is real and it's close. 🏁";
+  return MOTIVATIONS[done % MOTIVATIONS.length];
+}
+
+function formatDate(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+// ─── RENDER ──────────────────────────────────────────────────────────────────
+function render() {
+  renderStats();
+  renderWeekNav();
+  renderWeekDetail();
+  renderMotivation();
+  renderLog();
+}
+
+function renderStats() {
+  const done = totalCompleted();
+  const pct = Math.round((done / TOTAL_WORKOUTS) * 100);
+  document.getElementById('progressPct').textContent = pct + '%';
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('statWorkouts').textContent = done;
+  document.getElementById('statWeeks').textContent = weeksCompleted();
+  document.getElementById('statLeft').textContent = TOTAL_WORKOUTS - done;
+  document.getElementById('streakCount').textContent = streak();
+}
+
+function renderMotivation() {
+  document.getElementById('motivationText').textContent = getMotivation();
+}
+
+function renderWeekNav() {
+  const nav = document.getElementById('weekNav');
+  nav.innerHTML = '';
+  PROGRAM.forEach((week, i) => {
+    const w = i + 1;
+    const pill = document.createElement('button');
+    pill.className = 'week-pill';
+    pill.textContent = `Wk ${w}`;
+    if (weekCompleted(w)) pill.classList.add('completed');
+    if (w === state.currentWeek) pill.classList.add('active');
+    if (!weekUnlocked(w)) pill.classList.add('locked');
+    pill.onclick = () => {
+      if (!weekUnlocked(w)) { showToast('Complete the previous week first'); return; }
+      state.currentWeek = w;
+      saveState();
+      renderWeekNav();
+      renderWeekDetail();
+    };
+    nav.appendChild(pill);
+  });
+}
+
+function renderWeekDetail() {
+  const detail = document.getElementById('weekDetail');
+  const wk = PROGRAM[state.currentWeek - 1];
+  const w = state.currentWeek;
+
+  let intervalsHTML = wk.intervals.map(iv =>
+    `<span class="interval-chip ${iv.type}">${iv.type === 'run' ? '🏃' : '🚶'} ${iv.label}</span>`
+  ).join('');
+
+  let workoutsHTML = '';
+  for (let d = 1; d <= WORKOUTS_PER_WEEK; d++) {
+    const done = isCompleted(w, d);
+    const locked = !weekUnlocked(w);
+    const prevDone = d === 1 ? true : isCompleted(w, d - 1);
+    const available = !locked && prevDone;
+    const isToday = !done && available;
+
+    let iconClass = done ? 'done' : (isToday ? 'today' : 'upcoming');
+    let icon = done ? '✓' : (isToday ? '▶' : String(d));
+    let actionHTML = '';
+
+    if (done) {
+      const entry = state.completedWorkouts.find(e => e.week === w && e.day === d);
+      actionHTML = `
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:11px;color:var(--muted)">${entry ? formatDate(entry.date) : ''}</span>
+          <button class="btn-undo" onclick="undoWorkout(${w},${d})">Undo</button>
+        </div>`;
+    } else if (available) {
+      actionHTML = `<button class="btn-complete" onclick="completeWorkout(${w},${d})">Done ✓</button>`;
+    }
+
+    workoutsHTML += `
+      <div class="workout-card ${done ? 'completed' : ''} ${isToday ? 'active-today' : ''} ${!available && !done ? 'locked-card' : ''}">
+        <div class="workout-icon ${iconClass}">${icon}</div>
+        <div class="workout-info">
+          <div class="workout-name">Run ${d}</div>
+          <div class="workout-meta">
+            <span>~${wk.totalMin} min</span>
+            <span>${wk.intervals.filter(i=>i.type==='run').map(i=>i.label).join(' + ')}</span>
+          </div>
+          ${wk.special && d === 3 ? `<div style="font-size:11px;color:var(--accent2);margin-top:4px;">⭐ ${wk.special}</div>` : ''}
+        </div>
+        <div class="workout-action">${actionHTML}</div>
+      </div>`;
+  }
+
+  const allWeekDone = weekCompleted(w);
+
+  detail.innerHTML = `
+    <div class="week-header">
+      <div class="week-title">Week ${w} — ${wk.title}</div>
+      <div class="week-subtitle">${wk.description}</div>
+      <div class="week-intervals">${intervalsHTML}</div>
+    </div>
+    <div class="workouts-grid">${workoutsHTML}</div>
+    <div class="week-actions">
+      <button class="btn-secondary" onclick="repeatWeek(${w})">↺ Repeat this week</button>
+      ${allWeekDone && w < 9 ? `<button class="btn-secondary" style="color:var(--accent);border-color:var(--accent)" onclick="goNextWeek(${w})">Next Week →</button>` : ''}
+    </div>
+  `;
+}
+
+function renderLog() {
+  const container = document.getElementById('logEntries');
+  const entries = [...state.completedWorkouts].reverse();
+  if (entries.length === 0) {
+    container.innerHTML = `<div class="empty-log"><span class="big">👟</span>Your completed workouts will appear here.<br>Start your first run to build your log.</div>`;
+    return;
+  }
+  container.innerHTML = entries.map(e => {
+    const wk = PROGRAM[e.week - 1];
+    return `<div class="log-entry">
+      <div class="log-dot"></div>
+      <div class="log-info">
+        <div class="log-title">Week ${e.week}, Run ${e.day} — ${wk.title}</div>
+        <div class="log-date">${formatDate(e.date)} · ~${wk.totalMin} min</div>
+      </div>
+      <div class="log-badge">✓</div>
+    </div>`;
+  }).join('');
+}
+
+// ─── ACTIONS ─────────────────────────────────────────────────────────────────
+function completeWorkout(week, day) {
+  if (isCompleted(week, day)) return;
+  state.completedWorkouts.push({ week, day, date: new Date().toISOString() });
+  saveState();
+  render();
+  const msgs = ['Run logged! 🎉', 'Nailed it! 💪', 'That\'s a W! ✓', 'One step closer! 🏁'];
+  showToast(msgs[Math.floor(Math.random() * msgs.length)]);
+}
+
+function undoWorkout(week, day) {
+  state.completedWorkouts = state.completedWorkouts.filter(e => !(e.week === week && e.day === day));
+  saveState();
+  render();
+}
+
+function repeatWeek(week) {
+  state.completedWorkouts = state.completedWorkouts.filter(e => e.week !== week);
+  saveState();
+  render();
+  showToast('Week reset — go again 💪');
+}
+
+function goNextWeek(week) {
+  state.currentWeek = week + 1;
+  saveState();
+  renderWeekNav();
+  renderWeekDetail();
+  document.querySelector('.week-nav').scrollLeft += 60;
+}
+
+// ─── VIEWS ───────────────────────────────────────────────────────────────────
+function showView(view) {
+  document.getElementById('planView').classList.toggle('hidden', view !== 'plan');
+  document.getElementById('logView').classList.toggle('active', view === 'log');
+  document.getElementById('navPlan').classList.toggle('active', view === 'plan');
+  document.getElementById('navLog').classList.toggle('active', view === 'log');
+  if (view === 'log') renderLog();
+}
+
+// ─── TOAST ───────────────────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+loadState();
+render();
+</script>
+
+</body>
+</html>
