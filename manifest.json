@@ -3,6 +3,7 @@
   "short_name": "Road to 5K",
   "description": "9-week Couch to 5K training tracker",
   "start_url": "./run5k.html",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0d0d0d",
